@@ -1,0 +1,186 @@
+K-means clustering 
+#K-means Clustering 
+#Importing the dataset 
+dataset = read.csv(file.choose()) 
+dataset = dataset[4:5] 
+sum(is.na(dataset)) 
+dataset <- na.omit(dataset) 
+dataset 
+str(dataset) 
+set.seed(6) 
+wcss <- numeric(10)  # Initialize a numeric vector of length 10 
+with zeros 
+for (i in 1:10) { 
+cat("Processing k =", i, "\n")  # Print the current value of i 
+tryCatch({ 
+km <- kmeans(dataset, centers = i, nstart = 25) 
+wcss[i] <- sum(km$withinss) 
+}, error = function(e) { 
+cat("Error with k =", i, ":", conditionMessage(e), "\n") 
+wcss[i] <- NA  # Assign NA to indicate failure for this k 
+}) 
+} 
+print(wcss) 
+# Ensure that 'wcss' has valid values for plotting 
+if (all(!is.na(wcss))) { 
+plot(1:10, 
+wcss, 
+type = 'b', 
+main = 'The Elbow Method', 
+xlab = 'Number of clusters', 
+ylab = 'WCSS') 
+} else { 
+# Plot only the valid points 
+valid_indices <- !is.na(wcss) 
+plot(1:10[valid_indices], 
+wcss[valid_indices], 
+type = 'b', 
+main = 'The Elbow Method (with some clusters excluded)', 
+xlab = 'Number of clusters', 
+ylab = 'WCSS') 
+warning("Some clusters were excluded from the plot due to 
+errors.") 
+} 
+# Load cluster package 
+library(cluster) 
+# Assuming kmeans clustering result is stored in kmeans_result 
+# Run k-means with a specified number of clusters 
+set.seed(6) 
+kmeans_result <- kmeans(dataset, centers = 3, nstart = 25) 
+# clusplot function to visualize clusters 
+clusplot(dataset, kmeans_result$cluster, 
+color = TRUE,          
+# Use colors for clusters 
+shade = TRUE,        
+labels = 2,      
+lines = 0,         
+centroids 
+  # Shade the clusters 
+      #
+ Label clusters and data points 
+    # Remove lines connecting points to 
+main = "Cluster Plot using clusplot") 
+Naïve bayes: 
+# Load required packages 
+install.packages("e1071")   # If not already installed 
+library(e1071) 
+# View the first few rows and structure of the dataset 
+head(dataset) 
+str(dataset) 
+# Convert the target variable to a factor if it's categorical 
+dataset$lifeexpf <- as.factor(dataset$lifeexpf) 
+# Split data into training and testing sets (e.g., 80-20 split) 
+set.seed(42) 
+sample_index <- sample(seq_len(nrow(dataset)), size = 0.8 * 
+nrow(dataset)) 
+train_data <- dataset[sample_index, ] 
+test_data <- dataset[-sample_index, ] 
+# Train Naive Bayes model 
+nb_model <- naiveBayes(lifeexpf ~ ., data = train_data) 
+# Make predictions 
+predictions <- predict(nb_model, newdata = test_data) 
+# Evaluate accuracy 
+conf_matrix <- table(test_data$lifeexpf, predictions) 
+accuracy <- sum(diag(conf_matrix)) / sum(conf_matrix) 
+cat("Accuracy:", accuracy) 
+# Print confusion matrix 
+print(conf_matrix) 
+Linear regression and Decision Tree: 
+world_data <- read.csv(file.choose()) 
+library(tidyverse) 
+library(rpart) 
+library(rpart.plot) 
+library(caret) 
+# Function to clean numeric columns 
+clean_numeric <- function(x) { 
+as.numeric(gsub(",", "", x)) 
+} 
+# Clean all numeric columns containing commas 
+world_data$populatn <- clean_numeric(world_data$populatn) 
+world_data$gdp_cap <- clean_numeric(world_data$gdp_cap) 
+world_data$calories <- clean_numeric(world_data$calories) 
+world_data$aids <- clean_numeric(world_data$aids) 
+# Convert remaining character columns to numeric if needed 
+world_data$urban <- as.numeric(world_data$urban) 
+world_data$lifeexpf <- as.numeric(world_data$lifeexpf) 
+world_data$lifeexpm <- as.numeric(world_data$lifeexpm) 
+world_data$literacy <- as.numeric(world_data$literacy) 
+world_data$pop_incr <- as.numeric(world_data$pop_incr) 
+world_data$babymort <- as.numeric(world_data$babymort) 
+world_data$birth_rt <- as.numeric(world_data$birth_rt) 
+world_data$death_rt <- as.numeric(world_data$death_rt) 
+# Remove any rows with NA values 
+world_data <- na.omit(world_data) 
+# Linear Regression Analysis 
+# Select relevant numerical predictors 
+predictors <- c("urban", "lifeexpf", "literacy", "pop_incr", 
+"babymort",  
+"calories", "birth_rt", "death_rt") 
+# Create training and testing sets 
+set.seed(123) 
+train_index <- createDataPartition(world_data$gdp_cap, p = 
+0.7, list = FALSE) 
+train_data <- world_data[train_index, ] 
+test_data <- world_data[-train_index, ] 
+# Fit linear regression model 
+lm_model <- lm(gdp_cap ~ urban + lifeexpf + literacy + pop_incr 
++  
+babymort + calories + birth_rt + death_rt,  
+data = train_data) 
+# Print summary of linear regression 
+summary(lm_model) 
+# Make predictions on test set 
+lm_predictions <- predict(lm_model, test_data) 
+# Calculate RMSE for linear regression 
+lm_rmse <- sqrt(mean((test_data$gdp_cap - 
+lm_predictions)^2)) 
+print(paste("Linear Regression RMSE:", lm_rmse)) 
+# Create diagnostic plots 
+par(mfrow = c(2, 2)) 
+plot(lm_model) 
+# Decision Tree Analysis 
+# Fit decision tree model 
+dt_model <- rpart(gdp_cap ~ urban + lifeexpf + literacy + 
+pop_incr +  
+babymort + calories + birth_rt + death_rt, 
+data = train_data, 
+method = "anova", 
+control = rpart.control(maxdepth = 5)) 
+# Make predictions with decision tree 
+dt_predictions <- predict(dt_model, test_data) 
+# Calculate RMSE for decision tree 
+dt_rmse <- sqrt(mean((test_data$gdp_cap - dt_predictions)^2)) 
+print(paste("Decision Tree RMSE:", dt_rmse)) 
+# Variable importance plot 
+var_imp <- data.frame( 
+Feature = names(dt_model$variable.importance), 
+Importance = dt_model$variable.importance 
+) 
+var_imp <- var_imp[order(-var_imp$Importance), ] 
+# Plot variable importance 
+ggplot(var_imp, aes(x = reorder(Feature, Importance), y = 
+Importance)) + 
+geom_bar(stat = "identity", fill = "steelblue") + 
+coord_flip() + 
+theme_minimal() + 
+labs(x = "Features", y = "Importance", 
+t
+ itle = "Variable Importance in Decision Tree Model") 
+# Compare actual vs predicted values 
+results_df <- data.frame( 
+Actual = test_data$gdp_cap, 
+LM_Predicted = lm_predictions, 
+DT_Predicted = dt_predictions 
+) 
+# Create scatter plots for both models 
+par(mfrow = c(1, 2)) 
+plot(results_df$Actual, results_df$LM_Predicted, 
+main = "Linear Regression: Actual vs Predicted", 
+xlab = "Actual GDP per capita", 
+ylab = "Predicted GDP per capita") 
+abline(0, 1, col = "red") 
+plot(results_df$Actual, results_df$DT_Predicted, 
+main = "Decision Tree: Actual vs Predicted", 
+xlab = "Actual GDP per capita", 
+ylab = "Predicted GDP per capita") 
+abline(0, 1, col = "red") 
